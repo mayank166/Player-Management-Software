@@ -1,0 +1,291 @@
+#include<fstream.h>
+#include<conio.h>
+#include<string.h>
+#include<stdio.h>
+class fifa
+{
+		int overall;
+		char name[80],position[20],club[20],country[20];
+		float marketvalue;
+		int goals,assists;
+	public:
+		void input();
+		void output();
+		int roverall();
+		char *rname()
+		{
+			return name;
+		}
+		char *rposition()
+		{
+			return position;
+
+		}
+		char *rclub()
+		{
+			return club;
+
+		}
+		char *rcountry()
+		{
+			return country;
+
+		}
+		float rmarketvalue();
+		void calcmarketvalue();
+		int rgoals();
+		int rassists();
+};
+
+void create(char A[])
+{ 	 fstream F;
+	 fifa ob;
+	 F.open(A,ios::binary|ios::app);
+	 int choice;
+	 do
+	 {
+		ob.input();
+		F.write((char*)&ob,sizeof(ob));
+		cout<<"Do you want to input more players(0/1) ";
+		cin>>choice;
+	 }while(choice==0);
+	 F.close();
+}
+
+void display(char A[])
+{
+	fstream fil;
+	fifa ob;
+	fil.open(A,ios::binary|ios::in);
+	while(fil.read((char*)&ob,sizeof(ob)))
+	       {
+		ob.output();
+		}
+	fil.close();
+}
+
+void Delete(char A[])
+{
+	fstream fil1,fil2;
+	fifa ob;
+	char nam[80];
+	fil1.open(A,ios::binary|ios::in);
+	fil2.open("temp.dat",ios::binary|ios::out);
+	cout<<"Enter player name to be deleted :";
+	gets(nam);
+	int dele=0;
+	while(fil1.read((char*)&ob,sizeof(ob)))
+	{
+		if(strcmpi(ob.rname(),nam)!=0)
+			fil2.write((char*)&ob,sizeof(ob));
+		else
+			dele++;
+	}
+
+	if(!dele)
+		cout<<"\nRecord match not found....";
+	else
+		cout<<"\nRecord deleted...";
+	remove(A);
+	rename("temp.dat",A);
+	fil1.close();
+	fil2.close();
+}
+
+void searchname(char A[])
+{
+	ifstream fil(A,ios::binary);
+	fifa ob;
+	char m[80],x[80];
+	int found=0;
+	cout<<"Enter name to be searched :";
+	gets(x);
+	while(!found&&fil.read((char*)&ob,sizeof(ob)))
+	{
+		if(strcmpi(x,ob.rname())==0)
+		       {
+				found++;
+				ob.output();
+		       }
+	}
+	if(found==0)
+		cout<<" Player not found";
+	fil.close();
+}
+
+void sortoverall(char A[])
+{
+	fstream fil;
+	fifa ob,ob1;
+	fil.open(A,ios::binary|ios::in|ios::out);
+	fil.seekg(0,ios::end);
+	int NOR=fil.tellg()/sizeof(ob);
+	;
+	for(int i=0;i<NOR-1;i++)
+		for(int j=0;j<NOR-i-1;j++)
+		{
+			fil.seekg(j*sizeof(ob));
+			fil.read((char*)&ob,sizeof(ob));
+			fil.read((char*)&ob1,sizeof(ob1));
+			if(ob.roverall()>ob1.roverall())
+			{
+				fil.seekp(j*sizeof(ob));
+				fil.write((char*)&ob1,sizeof(ob));
+				fil.write((char*)&ob,sizeof(ob));
+			}
+		}
+	cout<<"Data sorted with respect to overall rating "<<endl;
+	display(A);
+	fil.close();
+}
+
+void sortmarketvalue(char A[])
+{
+	fstream fil;
+	fifa ob,ob1;
+	fil.open(A,ios::binary|ios::in|ios::out);
+	fil.seekg(0,ios::end);
+	int NOR=fil.tellg()/sizeof(ob);
+	for(int i=0;i<NOR-1;i++)
+	{
+		for(int j=0;j<NOR-i-1;j++)
+		{
+			fil.seekg(j*sizeof(ob));
+			fil.read((char*)&ob,sizeof(ob));
+			fil.read((char*)&ob1,sizeof(ob1));
+			if(ob.rmarketvalue()>ob1.rmarketvalue())
+			{
+				fil.seekp(j*sizeof(ob));
+				fil.write((char*)&ob1,sizeof(ob));
+				fil.write((char*)&ob,sizeof(ob));
+			}
+		}
+	}
+	cout<<"Data sorted with respect to market value of players "<<endl;
+	display(A);
+
+	fil.close();
+}
+
+
+int fifa::roverall()
+{
+	return(overall);
+}
+
+int fifa::rgoals()
+{
+	return(goals);
+}
+
+int fifa::rassists()
+{
+	return(assists);
+}
+
+float fifa::rmarketvalue()
+{
+	return(marketvalue);
+
+}
+
+void fifa::calcmarketvalue()
+{
+	marketvalue=goals*2 + assists*1;
+}
+
+void fifa::input()
+{
+	cout<<"Enter player name : ";
+	gets(name);
+	cout<<"Enter player overall: ";
+	cin>>overall;
+	cout<<"Enter player position (GK/DEF/MID/ATT) : ";
+	gets(position);
+	cout<<"Enter club name : ";
+	gets(club);
+	cout<<"Enter nationality : ";
+	gets(country);
+	cout<<"Enter number of goals : ";
+	cin>>goals;
+	cout<<"Enter number of assists : ";
+	cin>>assists;
+	calcmarketvalue();
+}
+void fifa::output()
+{
+	cout<<"Name  Overall rating  Position  Club  Nationality  Market Value  Goals  Assists "<<endl;
+	cout<<name<<"       "<<overall<<"           "<<position<<"     "<<club<<"    "<<country<<"     "<<marketvalue<<"   "<<goals<<"  "<<assists<<endl;
+}
+
+void main()
+{
+	clrscr();
+	fifa fifa20;
+	char choice,c;
+	int ch;
+	cout<<" Welcome to the computer science project of Mohit Agnihotri, Mayank Sachdeva,and Jasjot Singh "<<endl;
+	cout<<"Press any key to continue "<<endl;
+	cin>>c;
+	clrscr();
+	char A[80]="PLAYER.dat";
+	cout<<"Do you want to open the file PLAYER ? (Y/N)";
+	cin>>choice;
+	if(choice=='Y'||choice=='y')
+	{
+		do
+		{
+			clrscr();
+			cout<<"\n1. Enter details";
+			cout<<"\n2. Diplay details ";
+			cout<<"\n3. Delete details ";
+			cout<<"\n4. Search name of player ";
+			cout<<"\n5. Sort by overall ";
+			cout<<"\n6. Sort by market value ";
+			cout<<"\n7. EXIT "<<endl;
+			cin>>ch;
+			switch(ch)
+			{
+				case 1:
+					clrscr();
+					create(A);
+					getch();
+					break;
+				case 2:
+					clrscr();
+					display(A);
+					getch();
+					break;
+				case 3:
+					clrscr();
+					Delete(A);
+					getch();
+					break;
+				case 4:
+					clrscr();
+					searchname(A);
+					getch();
+					break;
+				case 5:
+					clrscr();
+					sortoverall(A);
+					getch();
+					break;
+				case 6:
+					clrscr();
+					sortmarketvalue(A);
+					getch();
+					break;
+				case 7:
+					cout<<"\nEXITING ";
+					break;
+				default:
+					cout<<"\nERROR 404!!!!!! ";
+				cin>>ch;
+			}
+		}while(ch!=7);
+	}
+	else
+		cout<<"FILE NOT OPENED !!";
+	getch();
+}
